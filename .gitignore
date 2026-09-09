@@ -1,0 +1,66 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Logs
+*.log
+logs/
+
+# Test reports
+target/surefire-reports/
+target/failsafe-reports/
+target/test-results/
+
+# Coverage
+target/site/jacoco/
+*.exec
+
+# Docker
+docker-compose.override.yml
+
+# Application
+*.jar
+*.war
+*.ear
+
+# H2
+*.mv.db
+*.trace.db
+
+# Swagger generated
+src/main/generated/
+
+# Lombok
+lombok.config
