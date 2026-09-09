@@ -16,7 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -109,8 +113,21 @@ class AuthControllerTest {
 
     @Test
     void protectedEndpointWithoutTokenReturns401() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/resources"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void invalidJwtReturns401() throws Exception {
+        mockMvc.perform(get("/resources")
+                        .header("Authorization", "Bearer invalid.token.here"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void malformedJwtReturns401() throws Exception {
+        mockMvc.perform(get("/resources")
+                        .header("Authorization", "Bearer not.a.valid.jwt"))
+                .andExpect(status().isUnauthorized());
     }
 }

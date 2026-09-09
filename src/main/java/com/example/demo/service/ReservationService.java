@@ -7,7 +7,6 @@ import com.example.demo.dto.reservation.ReservationUpdateRequest;
 import com.example.demo.entity.ReservationStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public interface ReservationService {
     ReservationResponse create(ReservationCreateRequest request, String username);

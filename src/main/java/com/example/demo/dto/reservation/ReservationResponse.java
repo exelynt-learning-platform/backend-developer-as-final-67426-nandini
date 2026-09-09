@@ -1,6 +1,7 @@
 package com.example.demo.dto.reservation;
 
 import com.example.demo.dto.resource.ResourceResponse;
+import com.example.demo.entity.ReservationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ public class ReservationResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal price;
-    private String status;
+    private ReservationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

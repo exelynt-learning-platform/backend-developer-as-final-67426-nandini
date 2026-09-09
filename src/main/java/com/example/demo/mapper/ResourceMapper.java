@@ -1,11 +1,15 @@
 package com.example.demo.mapper;
 
+import com.example.demo.dto.PagedResponse;
 import com.example.demo.dto.resource.ResourceCreateRequest;
 import com.example.demo.dto.resource.ResourceResponse;
 import com.example.demo.dto.resource.ResourceUpdateRequest;
 import com.example.demo.entity.Resource;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 
@@ -22,10 +26,11 @@ public interface ResourceMapper {
 
     ResourceResponse toResponse(Resource resource);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntity(Resource resource, ResourceUpdateRequest request);
+    void updateEntity(@MappingTarget Resource resource, ResourceUpdateRequest request);
 
     default PagedResponse<ResourceResponse> toPagedResponse(Page<Resource> page) {
         return new com.example.demo.dto.PagedResponse<>(

@@ -4,6 +4,7 @@ import com.example.demo.dto.resource.ResourceCreateRequest;
 import com.example.demo.entity.Resource;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
+import com.example.demo.repository.ReservationRepository;
 import com.example.demo.repository.ResourceRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtService;
@@ -33,6 +34,9 @@ class ResourceControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
     private ResourceRepository resourceRepository;
 
     @Autowired
@@ -50,6 +54,7 @@ class ResourceControllerTest {
 
     @BeforeEach
     void setup() {
+        reservationRepository.deleteAll();
         resourceRepository.deleteAll();
         userRepository.deleteAll();
 

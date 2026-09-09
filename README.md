@@ -183,9 +183,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 | POST | `/reservations` | USER, ADMIN | Create reservation |
 | GET | `/reservations` | USER, ADMIN | List reservations (filtered, paginated, sorted) |
 | GET | `/reservations/{id}` | USER, ADMIN | Get reservation by ID |
-| PUT | `/reservations/{id}` | USER, ADMIN | Update reservation |
-| DELETE | `/reservations/{id}` | USER, ADMIN | Delete reservation |
-| PUT | `/reservations/{id}/cancel` | USER, ADMIN | Cancel reservation |
+| PUT | `/reservations/{id}` | ADMIN | Update reservation |
+| DELETE | `/reservations/{id}` | ADMIN | Delete reservation |
+| PUT | `/reservations/{id}/cancel` | ADMIN | Cancel reservation |
 
 ## Reservation Request Example
 
@@ -255,7 +255,7 @@ Default sort: `createdAt,desc`
 Access the interactive API documentation at:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
 1. Call `POST /auth/login` to get a token

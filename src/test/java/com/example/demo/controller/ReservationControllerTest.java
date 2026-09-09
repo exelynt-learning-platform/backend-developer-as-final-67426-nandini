@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.reservation.ReservationCreateRequest;
+import com.example.demo.dto.reservation.ReservationUpdateRequest;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import com.example.demo.security.JwtService;
@@ -211,6 +212,71 @@ class ReservationControllerTest {
     }
 
     @Test
+    void userCannotUpdateReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
+                start.plusHours(1), end.plusHours(1), null);
+
+        mockMvc.perform(put("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userCannotDeleteReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        mockMvc.perform(delete("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userCannotCancelReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        mockMvc.perform(put("/reservations/" + reservationId + "/cancel")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void adminCanViewAllReservations() throws Exception {
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = LocalDateTime.now().plusHours(2);
@@ -253,6 +319,71 @@ class ReservationControllerTest {
         mockMvc.perform(get("/reservations/" + reservationId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminCanUpdateReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
+                start.plusHours(1), end.plusHours(1), null);
+
+        mockMvc.perform(put("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminCanDeleteReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        mockMvc.perform(delete("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void adminCanCancelReservation() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        mockMvc.perform(put("/reservations/" + reservationId + "/cancel")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -335,7 +466,7 @@ class ReservationControllerTest {
         Long reservationId = objectMapper.readTree(response).get("id").asLong();
 
         mockMvc.perform(put("/reservations/" + reservationId + "/cancel")
-                        .header("Authorization", "Bearer " + userToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(post("/reservations")
@@ -468,6 +599,44 @@ class ReservationControllerTest {
     }
 
     @Test
+    void invalidPageSizeReturns400() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("page", "0")
+                        .param("size", "0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void invalidNegativePageReturns400() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("page", "-1")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sortingByPriceWorks() throws Exception {
         Resource resource2 = Resource.builder()
                 .name("Expensive Room")
@@ -499,13 +668,99 @@ class ReservationControllerTest {
                         .header("Authorization", "Bearer " + userToken)
                         .param("sort", "price,asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].price").value(200.00))
-                .andExpect(jsonPath("$.content[1].price").value(1000.00));
+                .andExpect(jsonPath("$.content[0].price").value(100.00))
+                .andExpect(jsonPath("$.content[1].price").value(500.00));
+    }
+
+    @Test
+    void invalidSortPropertyReturns400() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("sort", "password,asc"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void unauthenticatedRequestReturns401() throws Exception {
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void invalidJwtReturns401() throws Exception {
+        mockMvc.perform(get("/reservations")
+                        .header("Authorization", "Bearer invalid.token.here"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminCanChangeReservationStatus() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
+                null, null, ReservationStatus.CONFIRMED);
+
+        mockMvc.perform(put("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
+    }
+
+    @Test
+    void priceRecalculatedWhenTimeChanges() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+
+        String response = mockMvc.perform(post("/reservations")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ReservationCreateRequest(resource.getId(), start, end))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long reservationId = objectMapper.readTree(response).get("id").asLong();
+        // Initial price: 1 hour * 100 = 100
+        BigDecimal initialPrice = objectMapper.readTree(response).get("price").decimalValue();
+
+        // Admin updates to 3 hours
+        LocalDateTime newStart = LocalDateTime.now().plusHours(1);
+        LocalDateTime newEnd = LocalDateTime.now().plusHours(4);
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(newStart, newEnd, null);
+
+        String updateResponse = mockMvc.perform(put("/reservations/" + reservationId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        BigDecimal updatedPrice = objectMapper.readTree(updateResponse).get("price").decimalValue();
+        // New price: 3 hours * 100 = 300
+        assert updatedPrice.compareTo(new BigDecimal("300.00")) == 0;
     }
 }

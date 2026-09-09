@@ -122,15 +122,22 @@ public class ReservationServiceImpl implements ReservationService {
             throw new UnauthorizedOperationException("You can only update your own reservations");
         }
 
-        if (request.getStartTime() != null && request.getEndTime() != null) {
-            validateTimeRange(request.getStartTime(), request.getEndTime());
-            checkOverlap(reservation.getResource().getId(), request.getStartTime(), request.getEndTime(), id);
-        } else if (request.getStartTime() != null) {
-            validateTimeRange(request.getStartTime(), reservation.getEndTime());
-            checkOverlap(reservation.getResource().getId(), request.getStartTime(), reservation.getEndTime(), id);
-        } else if (request.getEndTime() != null) {
-            validateTimeRange(reservation.getStartTime(), request.getEndTime());
-            checkOverlap(reservation.getResource().getId(), reservation.getStartTime(), request.getEndTime(), id);
+        LocalDateTime newStartTime = request.getStartTime() != null ? request.getStartTime() : reservation.getStartTime();
+        LocalDateTime newEndTime = request.getEndTime() != null ? request.getEndTime() : reservation.getEndTime();
+
+        validateTimeRange(newStartTime, newEndTime);
+
+        checkOverlap(reservation.getResource().getId(), newStartTime, newEndTime, id);
+
+        // Recalculate price if time changed
+        if (request.getStartTime() != null || request.getEndTime() != null) {
+            BigDecimal newPrice = calculatePrice(reservation.getResource().getPricePerHour(), newStartTime, newEndTime);
+            reservation.setPrice(newPrice);
+        }
+
+        // Update status if provided (ADMIN only, checked in controller)
+        if (request.getStatus() != null) {
+            reservation.setStatus(request.getStatus());
         }
 
         reservationMapper.updateEntity(reservation, request);
@@ -196,11 +203,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private Pageable buildPageable(int page, int size, String sort) {
-        if (size > 100) {
-            size = 100;
+        if (size < 1 || size > 100) {
+            throw new IllegalArgumentException("Page size must be between 1 and 100");
         }
         if (page < 0) {
-            page = 0;
+            throw new IllegalArgumentException("Page number must be >= 0");
         }
 
         if (sort != null && !sort.isBlank()) {
@@ -217,9 +224,10 @@ public class ReservationServiceImpl implements ReservationService {
                     break;
                 }
             }
-            if (allowed) {
-                return PageRequest.of(page, size, Sort.by(direction, property));
+            if (!allowed) {
+                throw new IllegalArgumentException("Invalid sort property: " + property + ". Allowed: price, startTime, endTime, createdAt, status");
             }
+            return PageRequest.of(page, size, Sort.by(direction, property));
         }
         return PageRequest.of(page, size, Sort.by("createdAt").descending());
     }

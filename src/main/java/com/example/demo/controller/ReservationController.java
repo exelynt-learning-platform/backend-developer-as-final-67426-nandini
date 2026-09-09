@@ -66,8 +66,8 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update a reservation")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Update a reservation (ADMIN only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
                                                       @Valid @RequestBody ReservationUpdateRequest request,
                                                       Authentication authentication) {
@@ -78,8 +78,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a reservation")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Delete a reservation (ADMIN only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
@@ -89,8 +89,8 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}/cancel")
-    @Operation(summary = "Cancel a reservation")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Cancel a reservation (ADMIN only)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> cancel(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
